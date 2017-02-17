@@ -21,17 +21,48 @@
 # define WIN_HGT				1000
 # define WIN_WDT				1000
 
+typedef struct	s_keys
+{
+	int						q;
+	int						e;
+	int						a;
+	int						s;
+	int						d;
+	int						w;
+}								t_keys;
+
 typedef	struct	s_point
 {
-	float		x;
-	float		y;
-	float 	z;
-	int 		color;
+	float					x;
+	float					y;
+	float 				z;
+	unsigned int 	color;
 }								t_point;
+
+typedef struct	s_img
+{
+	void 					*image;
+	char					*data;
+	int						height;
+	int						width;
+	int						sizeline;
+	int						bits;
+	int						endian;
+}								t_img;
+
+typedef	struct	s_cam
+{
+	float					x;
+	float					y;
+	float					z;
+}								t_cam;
 
 typedef struct  s_fdf
 {
 	t_point				**point;
+	t_img					*image;
+	t_cam					*view;
+	t_keys				key;
 	char					*read;
   int						xlen;
   int						ylen;

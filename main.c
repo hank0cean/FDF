@@ -271,6 +271,53 @@ int		rdnchk(int fd, t_fdf *map)
 	return (1);
 }
 
+int			key_press_hook(int key, t_fdf *map)
+{
+	printf("key_press: %i\n", key);
+	if (key == 13)
+		map->key.w = 1;
+	if (key == 0)
+		map->key.a = 1;
+	if (key == 1)
+		map->key.s = 1;
+	if (key == 2)
+		map->key.d = 1;
+	if (key == 12)
+		map->key.q = 1;
+	if (key == 14)
+		map->key.e = 1;
+	return (key);
+}
+
+int			key_release_hook(int key, t_fdf *map)
+{
+	printf("key_release: %i\n\n", key);
+	if (key == 53)
+	{
+		mlx_destroy_window(map->mlx, map->window);
+		exit(0);
+	}
+	if (key == 13)
+		map->key.w = 0;
+	if (key == 0)
+		map->key.a = 0;
+	if (key == 1)
+		map->key.s = 0;
+	if (key == 2)
+		map->key.d = 0;
+	if (key == 12)
+		map->key.q = 0;
+	if (key == 14)
+		map->key.e = 0;
+	return (key);
+}
+
+int			exit_hook(t_fdf *map)
+{
+	mlx_destroy_window(map->mlx, map->window);
+	exit(0);
+}
+
 #include <stdio.h>
 
 int		main(int argc, char **argv)
@@ -280,21 +327,25 @@ int		main(int argc, char **argv)
 
 	if (argc == 1 || argc == 3 || argc > 4)
 		return (err_msg("Usage : ./fdf <filename> [ case_size z_size ]\n"));
-
 	if (!(map = (t_fdf *)malloc(sizeof(t_fdf))))
 		return (err_msg("error\n"));
-
 	if (((fd = open(argv[1] , O_RDONLY)) == -1) || rdnchk(fd, map) == 0)
 		return (err_msg("error\n"));
 
 	printf("MLXvvv ::: centerx: %d\tcentery: %d\twindowcenterx: %d\twindowcentery: %d\n\n",
-		map->centerx, map->centery, 500, 500);
+		map->centerx, map->centery, WIN_WDT / 2, WIN_HGT / 2);
 
 
 	if (!(map->mlx = mlx_init()))
 		return (err_msg("error\n"));
-	map->mlx = mlx_new_window(map->mlx, WIN_WDT, WIN_HGT, "Im LOrDE");
+	map->window = mlx_new_window(map->mlx, WIN_WDT, WIN_HGT, "Im LOrDE");
 
+	map->image = mlx_new_image(map->mlx, WIN_WDT, WIN_HGT);
+	mlx_hook(map->window, 2, 0, key_press_hook, map);
+	mlx_hook(map->window, 3, 0, key_release_hook, map);
+	mlx_hook(map->window, 17, 0, exit_hook, map);
+	mlx_loop(map->mlx);
+	return (0);
 }
 
 
