@@ -251,7 +251,7 @@ int		rdin(int fd, t_fdf *map)
 	return (1);
 }
 
-int		rdnchk(int fd, t_fdf *map)
+int		chknflla(int fd, t_fdf *map)
 {
 	char	**lines;
 	int		y;
@@ -268,6 +268,9 @@ int		rdnchk(int fd, t_fdf *map)
 	}
 	map->centerx = (map->xlen / 2);
 	map->centery = (map->ylen / 2);
+	if (!(map->mlx = mlx_init()))
+		return (err_msg("error\n"));
+	map->window = mlx_new_window(map->mlx, WIN_WDT, WIN_HGT, "Im LOrDE");
 	return (1);
 }
 
@@ -312,10 +315,12 @@ int			key_release_hook(int key, t_fdf *map)
 	return (key);
 }
 
-int			exit_hook(t_fdf *map)
+int			fdf_loop_hook(t_fdf *map)
 {
-	mlx_destroy_window(map->mlx, map->window);
-	exit(0);
+		map->image.img = mlx_new_image(map->mlx, WIN_WDT, WIN_HGT);
+
+
+		return 0;
 }
 
 #include <stdio.h>
@@ -329,21 +334,19 @@ int		main(int argc, char **argv)
 		return (err_msg("Usage : ./fdf <filename> [ case_size z_size ]\n"));
 	if (!(map = (t_fdf *)malloc(sizeof(t_fdf))))
 		return (err_msg("error\n"));
-	if (((fd = open(argv[1] , O_RDONLY)) == -1) || rdnchk(fd, map) == 0)
+	if (((fd = open(argv[1] , O_RDONLY)) == -1) || chknflla(fd, map) == 0)
 		return (err_msg("error\n"));
 
 	printf("MLXvvv ::: centerx: %d\tcentery: %d\twindowcenterx: %d\twindowcentery: %d\n\n",
 		map->centerx, map->centery, WIN_WDT / 2, WIN_HGT / 2);
 
 
-	if (!(map->mlx = mlx_init()))
-		return (err_msg("error\n"));
-	map->window = mlx_new_window(map->mlx, WIN_WDT, WIN_HGT, "Im LOrDE");
 
-	map->image = mlx_new_image(map->mlx, WIN_WDT, WIN_HGT);
+
 	mlx_hook(map->window, 2, 0, key_press_hook, map);
+	printf("hello\n");
+	fdf_loop_hook(map);
 	mlx_hook(map->window, 3, 0, key_release_hook, map);
-	mlx_hook(map->window, 17, 0, exit_hook, map);
 	mlx_loop(map->mlx);
 	return (0);
 }
