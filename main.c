@@ -315,10 +315,22 @@ int			key_release_hook(int key, t_fdf *map)
 	return (key);
 }
 
+int			keycheck(t_fdf *map)
+{
+
+}
+
+int			fillimage(t_fdf *map)
+{
+	map->img = mlx_new_image(map->mlx, WIN_WDT, WIN_HGT);
+
+}
+
 int			fdf_loop_hook(t_fdf *map)
 {
-		map->image.img = mlx_new_image(map->mlx, WIN_WDT, WIN_HGT);
-
+		mlx_destroy_image(map->mlx, map->img);
+		keycheck(map);
+		fillimage(map);
 
 		return 0;
 }
@@ -343,10 +355,10 @@ int		main(int argc, char **argv)
 
 
 
-	mlx_hook(map->window, 2, 0, key_press_hook, map);
+	mlx_hook(map->win, 2, 0, key_press_hook, map);
 	printf("hello\n");
 	fdf_loop_hook(map);
-	mlx_hook(map->window, 3, 0, key_release_hook, map);
+	mlx_hook(map->win, 3, 0, key_release_hook, map);
 	mlx_loop(map->mlx);
 	return (0);
 }
