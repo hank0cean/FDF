@@ -50,24 +50,15 @@ typedef struct	s_img
 	int						endian;
 }								t_img;
 
-typedef	struct	s_cam
-{
-	float					x;
-	float					y;
-	float					z;
-}								t_cam;
-
 typedef struct  s_fdf
 {
 	t_point				**point;
+	t_point				center;
 	t_img					image;
-	t_cam					view;
 	t_keys				key;
 	char					*read;
   int						xlen;
   int						ylen;
-	int						centerx;
-	int						centery;
   void					*mlx;
   void					*window;
 }               t_fdf;

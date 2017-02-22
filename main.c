@@ -195,7 +195,7 @@ int		rowcheck(t_fdf *map, char **r, int *y)
 	{
 		i = 0;
 		if (ft_isdigit(r[gx][i]) == 1)
-			map->point[*y][gx].z = getnbr(r[gx], &i);
+			map->point[*y][gx] = make_point(gx, *y, getnbr(r[gx], &i));
 		if (r[gx][i] == ',')
 		{
 			i++;
@@ -244,11 +244,103 @@ int		rdin(int fd, t_fdf *map)
 		y++;
 	}
 	map->read = line;
+	ft_strdel(&line);
 	y < 2 ? 0 : (map->ylen = y);
 	map->point = (t_point**)malloc(sizeof(t_point*) * map->ylen);
 	while (y >= 0)
 		map->point[y--] = (t_point*)malloc(sizeof(t_point) * map->xlen);
 	return (1);
+}
+
+t_point	make_point(float x, float y, float z)
+{
+	t_point		point;
+
+	point.x = x;
+	point.y = y;
+	point.z = z;
+	return (point);
+}
+
+//		Means VVVVV
+
+float		xmean(t_fdf *map)
+{
+	float		sum;
+	int			d;
+	int			x;
+	int			y;
+
+	sum = 0;
+	d = 0;
+	y = 0;
+	while (y < grid->ylen)
+	{
+		x = 0;
+		while (x < grid->xlen)
+		{
+			sum += grid->point[y][x].x;
+			d++;
+			x++;
+		}
+		y++;
+	}
+	return (sum / (float)d);
+}
+
+float		ymean(t_fdf *map)
+{
+	float		sum;
+	int			d;
+	int			x;
+	int			y;
+
+	sum = 0;
+	d = 0;
+	y = 0;
+	while (y < map->ylen)
+	{
+		x = 0;
+		while (x < map->xlen)
+		{
+			sum += grid->point[y][x].y;
+			d++;
+			x++;
+		}
+		y++;
+	}
+	return (sum / (float)d);
+}
+
+float		zmean(t_fdf *map)
+{
+	float		sum;
+	int			d;
+	int			x;
+	int			y;
+
+	sum = 0;
+	d = 0;
+	y = 0;
+	while (y < map->ylen)
+	{
+		x = 0;
+		while (x < map->xlen)
+		{
+			sum += map->point[y][x].z
+			d++;
+			x++;
+		}
+		y++;
+	}
+	return (sum / (float)d);
+}
+
+// Find Center VVVVVVVVV
+
+t_point	find_center(t_fdf *map)
+{
+		return(make_point(xmean(map->point), ymean(map->point), zmean(map->point)));
 }
 
 int		chknflla(int fd, t_fdf *map)
@@ -257,6 +349,8 @@ int		chknflla(int fd, t_fdf *map)
 	int		y;
 
 	y = 0;
+	if (!(map = (t_fdf *)malloc(sizeof(t_fdf))))
+		return (err_msg("error\n"));
 	if (rdin(fd, map) == 0)
 		return (0);
 	lines = ft_strsplit(map->read, '\n');
@@ -266,13 +360,14 @@ int		chknflla(int fd, t_fdf *map)
 				return (0);
 		y++;
 	}
-	map->centerx = (map->xlen / 2);
-	map->centery = (map->ylen / 2);
+	map->center = find_center(map);
 	if (!(map->mlx = mlx_init()))
 		return (err_msg("error\n"));
 	map->window = mlx_new_window(map->mlx, WIN_WDT, WIN_HGT, "Im LOrDE");
 	return (1);
 }
+
+//  Keypress/Keyrelease  VVVVVVVVV
 
 int			key_press_hook(int key, t_fdf *map)
 {
@@ -322,6 +417,55 @@ int			key_release_hook(int key, t_fdf *map)
 		map->key.f = 0;
 	return (key);
 }
+
+//  XYZ Scaling VVVVVVVVV
+
+void xy_scale(t_fdf *map, float scale)
+{
+	int		x;
+	int		y;
+
+	x = 0;
+	y = 0;
+	while (y < map->ylen)
+	{
+		x = 0;
+		while (x < map->xlen)
+		{
+			map->point[y][x].x *= scale;
+			map->point[y][x].y *= scale;
+			x++;
+		}
+		y++;
+	}
+}
+
+void z_scale(t_fdf *map, float scale)
+{
+	int		x;
+	int		y;
+
+	x = 0;
+	y = 0;
+	while (y < map->ylen)
+	{
+		x = 0;
+		while (x < map->xlen)
+		{
+			map->point[y][x].z *= scale;
+			x++;
+		}
+		y++;
+	}
+}
+
+void scale(t_fdf *map, float xy, float z)
+{
+	xy_scale(map, xy);
+	z_scale(map, z);
+}
+
+// Rotations VVVVVVVV
 
 void rotxaxis(t_fdf *map, float	rot)
 {
@@ -375,7 +519,7 @@ int			fillimage(t_fdf *map)
 
 }
 
-int			fdf_loop_hook(t_fdf *map)
+int			fdf_hook(t_fdf *map)
 {
 		mlx_destroy_image(map->mlx, map->img);
 		keycheck(map);
@@ -384,6 +528,7 @@ int			fdf_loop_hook(t_fdf *map)
 		return 0;
 }
 
+
 #include <stdio.h>
 
 int		main(int argc, char **argv)
@@ -391,22 +536,22 @@ int		main(int argc, char **argv)
 	int				fd;
 	t_fdf		*map;
 
-	if (argc == 1 || argc == 3 || argc > 4)
+	if (argc != 2 || argc != 4)
 		return (err_msg("Usage : ./fdf <filename> [ case_size z_size ]\n"));
-	if (!(map = (t_fdf *)malloc(sizeof(t_fdf))))
-		return (err_msg("error\n"));
 	if (((fd = open(argv[1] , O_RDONLY)) == -1) || chknflla(fd, map) == 0)
 		return (err_msg("error\n"));
 
-	printf("MLXvvv ::: centerx: %d\tcentery: %d\twindowcenterx: %d\twindowcentery: %d\n\n",
-		map->centerx, map->centery, WIN_WDT / 2, WIN_HGT / 2);
+
+	if (argv[2] && argv[3])
+		scale(map, ft_atoi(argv[2]), ft_atoi(argv[3]));
+	else
+		scale(map, 10, 10);
 
 
 
 
+	mlx_loop_hook(map->mlx, fdf_hook, map);
 	mlx_hook(map->win, 2, 0, key_press_hook, map);
-	printf("hello\n");
-	fdf_loop_hook(map);
 	mlx_hook(map->win, 3, 0, key_release_hook, map);
 	mlx_loop(map->mlx);
 	return (0);
