@@ -289,6 +289,10 @@ int			key_press_hook(int key, t_fdf *map)
 		map->key.q = 1;
 	if (key == 14)
 		map->key.e = 1;
+	if (key == 15)
+		map->key.r = 1;
+	if (key == 3)
+		map->key.f = 1;
 	return (key);
 }
 
@@ -312,16 +316,61 @@ int			key_release_hook(int key, t_fdf *map)
 		map->key.q = 0;
 	if (key == 14)
 		map->key.e = 0;
+	if (key == 15)
+		map->key.r = 0;
+	if (key == 3)
+		map->key.f = 0;
 	return (key);
+}
+
+void rotxaxis(t_fdf *map, float	rot)
+{
+
+}
+
+void rotyaxis(t_fdf *map, float rot)
+{
+
+}
+
+void spinz(t_fdf *map, float rot)
+{
+
+}
+
+void zoom(t_fdf *map, float zoom)
+{
+
 }
 
 int			keycheck(t_fdf *map)
 {
+	//Rotation matrices applied to (x,y,z) when keys are on
+	if (map->key.w)
+		rotxaxis(map, -0.005);
+	else if (map->key.s)
+		rotxaxis(map, 0.005);
+	if (map->key.a)
+		rotyaxis(map, -0.005);
+	else if (map->key.d)
+		rotyaxis(map, 0.005);
+	if (map->key.q)
+		spinz(map, -0.005);
+	else if (map->key.e)
+		spinz(map, 0.005);
 
+	// Z00M Z00M
+	//
+	// if (map->key.f)
+	// 	zoom(map, );
+	// else if (map->key.r)
+	// 	zoom(map, )
 }
 
 int			fillimage(t_fdf *map)
 {
+	//Apply scaling for x&y&z pixel lengths && Convert (x,y,z) to (x,y) for image pixels
+
 	map->img = mlx_new_image(map->mlx, WIN_WDT, WIN_HGT);
 
 }
