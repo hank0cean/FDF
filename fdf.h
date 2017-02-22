@@ -41,7 +41,7 @@ typedef	struct	s_point
 
 typedef struct	s_img
 {
-	void 					*image;
+	void 					*img;
 	char					*data;
 	int						height;
 	int						width;
@@ -60,8 +60,8 @@ typedef	struct	s_cam
 typedef struct  s_fdf
 {
 	t_point				**point;
-	t_img					*image;
-	t_cam					*view;
+	t_img					image;
+	t_cam					view;
 	t_keys				key;
 	char					*read;
   int						xlen;
