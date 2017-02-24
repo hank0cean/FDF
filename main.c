@@ -184,6 +184,17 @@ int         getnbr(char *str, int *i)
 
 
 
+t_point		make_point(float x, float y, float z)
+{
+	t_point		point;
+
+	point.x = x;
+	point.y = y;
+	point.z = z;
+	return (point);
+}
+
+
 
 int		rowcheck(t_fdf *map, char **r, int *y)
 {
@@ -241,9 +252,10 @@ int		rdin(int fd, t_fdf *map)
 			return (0);
 		line = ft_strjoin(line, "\n");
 		line = ft_strjoin(line, row);
+		ft_strdel(&row);
 		y++;
 	}
-	map->read = line;
+	map->read = ft_strdup(line);
 	ft_strdel(&line);
 	y < 2 ? 0 : (map->ylen = y);
 	map->point = (t_point**)malloc(sizeof(t_point*) * map->ylen);
@@ -252,17 +264,7 @@ int		rdin(int fd, t_fdf *map)
 	return (1);
 }
 
-t_point	make_point(float x, float y, float z)
-{
-	t_point		point;
-
-	point.x = x;
-	point.y = y;
-	point.z = z;
-	return (point);
-}
-
-//		Means VVVVV
+		// Means VVVVV
 
 float		xmean(t_fdf *map)
 {
@@ -274,12 +276,12 @@ float		xmean(t_fdf *map)
 	sum = 0;
 	d = 0;
 	y = 0;
-	while (y < grid->ylen)
+	while (y < map->ylen)
 	{
 		x = 0;
-		while (x < grid->xlen)
+		while (x < map->xlen)
 		{
-			sum += grid->point[y][x].x;
+			sum += map->point[y][x].x;
 			d++;
 			x++;
 		}
@@ -303,7 +305,7 @@ float		ymean(t_fdf *map)
 		x = 0;
 		while (x < map->xlen)
 		{
-			sum += grid->point[y][x].y;
+			sum += map->point[y][x].y;
 			d++;
 			x++;
 		}
@@ -327,7 +329,7 @@ float		zmean(t_fdf *map)
 		x = 0;
 		while (x < map->xlen)
 		{
-			sum += map->point[y][x].z
+			sum += map->point[y][x].z;
 			d++;
 			x++;
 		}
@@ -340,7 +342,7 @@ float		zmean(t_fdf *map)
 
 t_point	find_center(t_fdf *map)
 {
-		return(make_point(xmean(map->point), ymean(map->point), zmean(map->point)));
+		return(make_point(xmean(map), ymean(map), zmean(map)));
 }
 
 int		chknflla(int fd, t_fdf *map)
@@ -349,21 +351,19 @@ int		chknflla(int fd, t_fdf *map)
 	int		y;
 
 	y = 0;
-	if (!(map = (t_fdf *)malloc(sizeof(t_fdf))))
-		return (err_msg("error\n"));
 	if (rdin(fd, map) == 0)
 		return (0);
 	lines = ft_strsplit(map->read, '\n');
+	ft_strdel(&map->read);
 	while (y < map->ylen)
 	{
 		if (rowcheck(map, ft_strsplit(lines[y], ' '), &y) != 1)
 				return (0);
 		y++;
 	}
-	map->center = find_center(map);
 	if (!(map->mlx = mlx_init()))
 		return (err_msg("error\n"));
-	map->window = mlx_new_window(map->mlx, WIN_WDT, WIN_HGT, "Im LOrDE");
+	map->win = mlx_new_window(map->mlx, WIN_WDT, WIN_HGT, "Im LOrDE");
 	return (1);
 }
 
@@ -396,7 +396,7 @@ int			key_release_hook(int key, t_fdf *map)
 	printf("key_release: %i\n\n", key);
 	if (key == 53)
 	{
-		mlx_destroy_window(map->mlx, map->window);
+		mlx_destroy_window(map->mlx, map->win);
 		exit(0);
 	}
 	if (key == 13)
@@ -418,7 +418,7 @@ int			key_release_hook(int key, t_fdf *map)
 	return (key);
 }
 
-//  XYZ Scaling VVVVVVVVV
+ // XYZ Scaling VVVVVVVVV
 
 void xy_scale(t_fdf *map, float scale)
 {
@@ -467,90 +467,108 @@ void scale(t_fdf *map, float xy, float z)
 
 // Rotations VVVVVVVV
 
-void rotxaxis(t_fdf *map, float	rot)
-{
+// void rotxaxis(t_fdf *map, float	rot)
+// {
+//
+// }
+//
+// void rotyaxis(t_fdf *map, float rot)
+// {
+//
+// }
+//
+// void spinz(t_fdf *map, float rot)
+// {
+//
+// }
+//
+// void zoom(t_fdf *map, float zoom)
+// {
+//
+// }
 
-}
-
-void rotyaxis(t_fdf *map, float rot)
-{
-
-}
-
-void spinz(t_fdf *map, float rot)
-{
-
-}
-
-void zoom(t_fdf *map, float zoom)
-{
-
-}
-
-int			keycheck(t_fdf *map)
-{
-	//Rotation matrices applied to (x,y,z) when keys are on
-	if (map->key.w)
-		rotxaxis(map, -0.005);
-	else if (map->key.s)
-		rotxaxis(map, 0.005);
-	if (map->key.a)
-		rotyaxis(map, -0.005);
-	else if (map->key.d)
-		rotyaxis(map, 0.005);
-	if (map->key.q)
-		spinz(map, -0.005);
-	else if (map->key.e)
-		spinz(map, 0.005);
-
-	// Z00M Z00M
-	//
-	// if (map->key.f)
-	// 	zoom(map, );
-	// else if (map->key.r)
-	// 	zoom(map, )
-}
+// int			keycheck(t_fdf *map)
+// {
+// 	//Rotation matrices applied to (x,y,z) when keys are on
+// 	if (map->key.w)
+// 		rotxaxis(map, -0.005);
+// 	else if (map->key.s)
+// 		rotxaxis(map, 0.005);
+// 	if (map->key.a)
+// 		rotyaxis(map, -0.005);
+// 	else if (map->key.d)
+// 		rotyaxis(map, 0.005);
+// 	if (map->key.q)
+// 		spinz(map, -0.005);
+// 	else if (map->key.e)
+// 		spinz(map, 0.005);
+//
+// 	// Z00M Z00M VV
+//
+// 	if (map->key.f)
+// 		zoom(map, 1.1);
+// 	else if (map->key.r)
+// 		zoom(map, 0.9);
+// }
 
 int			fillimage(t_fdf *map)
 {
 	//Apply scaling for x&y&z pixel lengths && Convert (x,y,z) to (x,y) for image pixels
 
-	map->img = mlx_new_image(map->mlx, WIN_WDT, WIN_HGT);
+	map->image.img = mlx_new_image(map->mlx, WIN_WDT, WIN_HGT);
 
+	map->center = find_center(map);
+
+	return (0);
 }
 
 int			fdf_hook(t_fdf *map)
 {
-		mlx_destroy_image(map->mlx, map->img);
-		keycheck(map);
+		mlx_destroy_image(map->mlx, map->image.img);
+		// keycheck(map);
 		fillimage(map);
 
 		return 0;
 }
 
 
+void key0(t_fdf *map)
+{
+	map->key.w = 0;
+	map->key.s = 0;
+	map->key.a = 0;
+	map->key.d = 0;
+	map->key.q = 0;
+	map->key.e = 0;
+	map->key.r = 0;
+	map->key.f = 0;
+}
+
 #include <stdio.h>
 
 int		main(int argc, char **argv)
 {
 	int				fd;
-	t_fdf		*map;
+	t_fdf			*map;
 
-	if (argc != 2 || argc != 4)
+	if (argc != 2 && argc != 4)
 		return (err_msg("Usage : ./fdf <filename> [ case_size z_size ]\n"));
+	if (!(map = (t_fdf *)malloc(sizeof(t_fdf))))
+		return (err_msg("error\n"));
 	if (((fd = open(argv[1] , O_RDONLY)) == -1) || chknflla(fd, map) == 0)
 		return (err_msg("error\n"));
 
+	key0(map);
+	//
+	// if (argv[2] && argv[3])
+	// 	scale(map, ft_atoi(argv[2]), ft_atoi(argv[3]));
+	// else
+	// 	scale(map, 10, 10);
 
-	if (argv[2] && argv[3])
-		scale(map, ft_atoi(argv[2]), ft_atoi(argv[3]));
-	else
-		scale(map, 10, 10);
 
 
 
-
-	mlx_loop_hook(map->mlx, fdf_hook, map);
+	// mlx_loop_hook(map->mlx, fdf_hook, map);
 	mlx_hook(map->win, 2, 0, key_press_hook, map);
 	mlx_hook(map->win, 3, 0, key_release_hook, map);
 	mlx_loop(map->mlx);

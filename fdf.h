@@ -23,12 +23,14 @@
 
 typedef struct	s_keys
 {
+	int						w;
+	int						s;
+	int						a;
+	int						d;
 	int						q;
 	int						e;
-	int						a;
-	int						s;
-	int						d;
-	int						w;
+	int						r;
+	int						f;
 }								t_keys;
 
 typedef	struct	s_point
@@ -60,7 +62,7 @@ typedef struct  s_fdf
   int						xlen;
   int						ylen;
   void					*mlx;
-  void					*window;
+  void					*win;
 }               t_fdf;
 
 #endif
