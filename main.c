@@ -345,6 +345,18 @@ t_point	find_center(t_fdf *map)
 		return(make_point(xmean(map), ymean(map), zmean(map)));
 }
 
+void key0(t_fdf *map)
+{
+	map->key.w = 0;
+	map->key.s = 0;
+	map->key.a = 0;
+	map->key.d = 0;
+	map->key.q = 0;
+	map->key.e = 0;
+	map->key.r = 0;
+	map->key.f = 0;
+}
+
 int		chknflla(int fd, t_fdf *map)
 {
 	char	**lines;
@@ -364,6 +376,7 @@ int		chknflla(int fd, t_fdf *map)
 	if (!(map->mlx = mlx_init()))
 		return (err_msg("error\n"));
 	map->win = mlx_new_window(map->mlx, WIN_WDT, WIN_HGT, "Im LOrDE");
+	key0(map);
 	return (1);
 }
 
@@ -467,82 +480,216 @@ void scale(t_fdf *map, float xy, float z)
 
 // Rotations VVVVVVVV
 
-// void rotxaxis(t_fdf *map, float	rot)
-// {
-//
-// }
-//
-// void rotyaxis(t_fdf *map, float rot)
-// {
-//
-// }
-//
-// void spinz(t_fdf *map, float rot)
-// {
-//
-// }
+void rotxaxis(t_fdf *map, float	rot)
+{
+	double			yd;
+	double			zd;
+	double			d;
+	double			theta;
+	int					x;
+	int					y;
+
+	y = 0;
+	while (y < map->ylen)
+	{
+		x = 0;
+		while (x < xlen)
+		{
+			yd = map->point[y][x].y - map->center.y;
+			zd = map->point[y][x].z - map->center.z;
+			d = hypot(yd, zd);
+			theta = atan2(yd, zd) + rot;
+			map->point[y][x].y = d * sin(theta) + map->center.y;
+			map->point[y][x].z = d * cos(theta) + map->center.z;
+			x++;
+		}
+		y++;
+	}
+}
+
+void rotyaxis(t_fdf *map, float rot)
+{
+	double			xd;
+	double			zd;
+	double			d;
+	double			theta;
+	int					x;
+	int					y;
+
+	y = 0;
+	while (y < map->ylen)
+	{
+		x = 0;
+		while (x < map->xlen)
+		{
+			xd = map->point[y][x].x - map->center.x;
+			zd = map->point[y][x].z - map->center.z;
+			d = hypot(xd, yd);
+			theta = atan2(xd, yd) + rot; //adjusted angle of rotation around y axis
+			map->point[y][x].x = d * cos(theta) + map->center.x; //(hypot * new angle) = x (floa†ing point around center) + mapcenter
+			map->point[y][x].z = d * sin(theta) + map->center.z;
+			x++;
+		}
+	}
+}
+
+void spinz(t_fdf *map, float rot)
+{
+	double			xd;
+	double			yd;
+	double			d;
+	double			theta;
+	int					x;
+	int					y;
+
+	y = 0;
+	while (y < map->ylen)
+	{
+		x = 0;
+		while (x < map->xlen)
+		{
+			xd = map->point[y][x].x - map->center.x;
+			yd = map->point[y][x].y - map->center.y;
+			d = hypot(xd, yd);
+			theta = atan2(xd, yd) + rot;
+			map->point[y][x].x = d * cos(theta) + map->center.x;
+			map->point[y][x].x = d * sin(theta) + map->center.y;
+			x++;
+		}
+		y++;
+	}
+}
 //
 // void zoom(t_fdf *map, float zoom)
 // {
 //
 // }
 
-// int			keycheck(t_fdf *map)
-// {
-// 	//Rotation matrices applied to (x,y,z) when keys are on
-// 	if (map->key.w)
-// 		rotxaxis(map, -0.005);
-// 	else if (map->key.s)
-// 		rotxaxis(map, 0.005);
-// 	if (map->key.a)
-// 		rotyaxis(map, -0.005);
-// 	else if (map->key.d)
-// 		rotyaxis(map, 0.005);
-// 	if (map->key.q)
-// 		spinz(map, -0.005);
-// 	else if (map->key.e)
-// 		spinz(map, 0.005);
-//
+int			keycheck(t_fdf *map)
+{
+	//Rotation matrices applied to (x,y,z) when keys are on
+	if (map->key.w)
+		rotxaxis(map, -0.01);
+	else if (map->key.s)
+		rotxaxis(map, 0.01);
+	if (map->key.a)
+		rotyaxis(map, -0.01);
+	else if (map->key.d)
+		rotyaxis(map, 0.01);
+	if (map->key.q)
+		spinz(map, -0.01);
+	else if (map->key.e)
+		spinz(map, 0.01);
+
 // 	// Z00M Z00M VV
 //
 // 	if (map->key.f)
 // 		zoom(map, 1.1);
 // 	else if (map->key.r)
 // 		zoom(map, 0.9);
-// }
 
-int			fillimage(t_fdf *map)
+}
+
+int			setx(float centerx);
 {
-	//Apply scaling for x&y&z pixel lengths && Convert (x,y,z) to (x,y) for image pixels
+	return ((WIN_WDT / 2) - centerx);
+}
 
+int			sety(float centery)
+{
+	return ((WIN_HGT / 2) - centery);
+}
+
+void 		put_image_pixel(t_img image, int x, int y, int color)
+{
+	int		b;
+
+	if (x >= image.width || y >= image.height)
+		return ;
+	b = (4 * x) + (y * image.sizeline);
+	image.data[b++] = color & 0xFF;
+	iamge.data[b++] = (color >> 8) & 0xFF;
+	image.data[b]		= (color >> 16) & 0xFF;
+}
+
+void 		drawline(t_fdf *map, t_line line)
+{
+	line.dx = abs(line.x2 - line.x1);
+	line.dy = abs(line.y2 - line.y1);
+	line.xi = line.x1 < line.x2 ? 1 : -1;
+	line.yi = line.y1 < line.y2 ? 1 : -1;
+	line.e = (line.dx > line.dy ? line.dx : -(line.dy)) / 2;
+	while (line.x1 != line.x2 && line.y1 != line.y2)
+	{
+		put_image_pixel(map->image, line.x1, line.y1, 0xFF0000);
+		line.etmp = e;
+		if (line.etmp > -(line.dx))
+		{
+			line.e -= line.dy;
+			line.x1 += line.xi;
+		}
+		if (line.etmp < line.dy)
+		{
+			line.e += line.dy;
+			line.y1 += line.yi;
+		}
+	}
+	put_image_pixel(map->image, line.x1, line.y1, 0xFF0000);
+}
+
+t_line	line(t_point p1, t_point p2, int setx, int sety)
+{
+	t_line		line;
+
+	line.x1 = p1.x + setx;
+	line.y1 = p1.y + sety;
+	line.x2 = p2.x + setx;
+	line.y2 = p2.y + sety;
+	return (line);
+}
+
+void 		drawimage(t_fdf *map)
+{
+	int			y;
+	int			x;
+
+	y = 0;
+	while (y < map->ylen)
+	{
+		x = 0;
+		while (x < map->xlen)
+		{
+			if (y != map->ylen)
+				drawline(map, line(map->point[y][x], map->point[y + 1][x],
+					setx(map->center.x), sety(map->center.y)));
+			if (x != map->xlen)
+				drawline(map, line(map->point[y][x], map->point[y][x + 1],
+					setx(map->center.x), sety(map->center.y)));
+			x++;
+		}
+		y++;
+	}
+}
+
+void			fillimage(t_fdf *map)
+{
 	map->image.img = mlx_new_image(map->mlx, WIN_WDT, WIN_HGT);
-
+	map->image.data = mlx_get_data_addr(map->image.img, &map->image.bits,
+		&map->image.sizeline, &map->image.endian);
+	map->image.height = WIN_HGT;
+	map->image.width = WIN_WDT;
 	map->center = find_center(map);
-
-	return (0);
+	drawimage(map);
 }
 
 int			fdf_hook(t_fdf *map)
 {
 		mlx_destroy_image(map->mlx, map->image.img);
-		// keycheck(map);
+		keycheck(map);
 		fillimage(map);
-
 		return 0;
 }
 
-
-void key0(t_fdf *map)
-{
-	map->key.w = 0;
-	map->key.s = 0;
-	map->key.a = 0;
-	map->key.d = 0;
-	map->key.q = 0;
-	map->key.e = 0;
-	map->key.r = 0;
-	map->key.f = 0;
-}
 
 #include <stdio.h>
 
@@ -557,18 +704,11 @@ int		main(int argc, char **argv)
 		return (err_msg("error\n"));
 	if (((fd = open(argv[1] , O_RDONLY)) == -1) || chknflla(fd, map) == 0)
 		return (err_msg("error\n"));
-
-	key0(map);
-	//
-	// if (argv[2] && argv[3])
-	// 	scale(map, ft_atoi(argv[2]), ft_atoi(argv[3]));
-	// else
-	// 	scale(map, 10, 10);
-
-
-
-
-	// mlx_loop_hook(map->mlx, fdf_hook, map);
+	if (argv[2] && argv[3])
+		scale(map, ft_atoi(argv[2]), ft_atoi(argv[3]));
+	else
+		scale(map, 20, 20);
+	mlx_loop_hook(map->mlx, fdf_hook, map);
 	mlx_hook(map->win, 2, 0, key_press_hook, map);
 	mlx_hook(map->win, 3, 0, key_release_hook, map);
 	mlx_loop(map->mlx);
