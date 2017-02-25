@@ -16,7 +16,7 @@
 # include <math.h>
 
 # include "./libft/libft.h"
-# include "./mlx/mlx.h"
+# include "./minilibx/mlx.h"
 
 # define WIN_HGT				1000
 # define WIN_WDT				1000
@@ -35,10 +35,10 @@ typedef struct	s_keys
 
 typedef struct	s_line
 {
-	float					x1;
-	float					y1;
-	float					x2;
-	float					y2;
+	int						x1;
+	int						y1;
+	int						x2;
+	int						y2;
 	int						dx;
 	int						dy;
 	int						xi;
