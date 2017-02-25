@@ -45,7 +45,7 @@ typedef struct	s_line
 	int						yi;
 	int						e;
 	int						etmp;
-}
+}								t_line;
 
 typedef	struct	s_point
 {
