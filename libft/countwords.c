@@ -1,33 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strjoin.c                                       :+:      :+:    :+:   */
+/*   countwords.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chansen <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2016/09/29 15:02:11 by chansen           #+#    #+#             */
-/*   Updated: 2017/02/28 21:16:18 by chansen          ###   ########.fr       */
+/*   Created: 2017/02/28 10:40:59 by chansen           #+#    #+#             */
+/*   Updated: 2017/02/28 10:56:07 by chansen          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./libft.h"
 
-char	*ft_strjoin(char const *s1, char const *s2)
+int		countwords(char *str)
 {
-	char		*str;
-	unsigned	i;
-	unsigned	a;
-	unsigned	b;
+	int		i;
+	int		count;
 
 	i = 0;
-	a = 0;
-	b = 0;
-	str = ft_strnew(((ft_strlen((char *)s1)) + (ft_strlen((char *)s2))));
-	if (!str)
-		return (NULL);
-	while (s1[a])
-		str[i++] = s1[a++];
-	while (s2[b])
-		str[i++] = s2[b++];
-	return (str);
+	count = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] != ' ' && (str[i + 1] == ' ' || str[i + 1] == '\0'))
+			count++;
+		i++;
+	}
+	return (count);
 }

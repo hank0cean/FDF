@@ -6,7 +6,7 @@
 #    By: chansen <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/10/02 15:14:07 by chansen           #+#    #+#              #
-#    Updated: 2017/01/31 15:16:24 by chansen          ###   ########.fr        #
+#    Updated: 2017/02/28 11:00:25 by chansen          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,13 +16,17 @@ CC = gcc
 
 CFLAG = -c -Wall -Werror -Wextra
 
-SRC_NAME = ft_atoi.c \
+SRC_NAME =	ft_getnbr.c \
+			countwords.c \
+			ft_atoi.c \
 			ft_bzero.c \
 			ft_isalnum.c \
 			ft_isalpha.c \
 			ft_isascii.c \
 			ft_isdigit.c \
 			ft_isprint.c \
+			ft_ishexascii.c \
+			ft_isbinary.c \
 			ft_memccpy.c \
 			ft_memchr.c \
 			ft_memcmp.c \
